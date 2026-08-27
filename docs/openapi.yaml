@@ -1,0 +1,97 @@
+openapi: 3.1.0
+info:
+  title: SLO Forge API
+  version: 1.0.0
+  description: Compile one SLO YAML document into monitoring artifacts.
+servers:
+  - url: http://localhost:8080
+paths:
+  /healthz:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: The process is healthy.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /readyz:
+    get:
+      operationId: readiness
+      responses:
+        "200":
+          description: The process is ready to compile documents.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+  /metrics:
+    get:
+      operationId: metrics
+      responses:
+        "200":
+          description: Prometheus text exposition.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /v1/render:
+    post:
+      operationId: renderSLO
+      requestBody:
+        required: true
+        content:
+          application/yaml:
+            schema:
+              type: string
+              maxLength: 1048576
+      responses:
+        "200":
+          description: Compiled artifacts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RenderResponse"
+        "415":
+          $ref: "#/components/responses/Problem"
+        "422":
+          $ref: "#/components/responses/Problem"
+components:
+  responses:
+    Problem:
+      description: The request could not be processed.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+  schemas:
+    Health:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: ok
+    RenderResponse:
+      type: object
+      required: [prometheusRules, prometheusRule, grafanaDashboard, explanation]
+      properties:
+        prometheusRules:
+          type: string
+        prometheusRule:
+          type: string
+        grafanaDashboard:
+          type: string
+        explanation:
+          type: string
+    Problem:
+      type: object
+      required: [status, title, detail]
+      properties:
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string

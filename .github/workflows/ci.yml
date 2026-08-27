@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test and validate artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Check formatting
+        shell: bash
+        run: |
+          files="$(gofmt -l cmd internal)"
+          test -z "$files" || { echo "$files"; exit 1; }
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test with race detector
+        run: go test -race -coverprofile=coverage.out ./...
+
+      - name: Build CLI
+        run: go build -trimpath -ldflags="-s -w -X main.version=ci" -o bin/slo-forge ./cmd/slo-forge
+
+      - name: Detect generated artifact drift
+        run: |
+          go run ./cmd/slo-forge render -f examples/checkout-api.slo.yaml -o examples/generated
+          git diff --exit-code -- examples/generated
+
+      - name: Validate Prometheus rules
+        run: >-
+          docker run --rm
+          -v "${{ github.workspace }}/examples/generated:/work:ro"
+          --entrypoint /bin/promtool
+          prom/prometheus:v3.14.0
+          check rules /work/prometheus-rules.yaml
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage
+          path: coverage.out
+          if-no-files-found: warn
+          retention-days: 7
+
+  container:
+    name: Build and scan container
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Build non-root image
+        run: docker build --build-arg VERSION=ci --tag slo-forge:${{ github.sha }} .
+
+      - name: Scan image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: slo-forge:${{ github.sha }}
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH

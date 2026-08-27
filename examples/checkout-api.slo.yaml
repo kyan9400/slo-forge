@@ -1,0 +1,17 @@
+apiVersion: sloforge.dev/v1alpha1
+kind: ServiceLevelObjective
+metadata:
+  name: availability
+  labels:
+    team: checkout
+    tier: "1"
+spec:
+  service: checkout-api
+  description: The proportion of checkout requests that do not return a server error.
+  target: 99.9
+  window: 30d
+  indicator:
+    badQuery: sum(rate(http_requests_total{service="checkout-api",code=~"5.."}[{{ .window }}]))
+    totalQuery: sum(rate(http_requests_total{service="checkout-api"}[{{ .window }}]))
+  runbookURL: https://github.com/kyan9400/slo-forge/blob/main/docs/runbooks/high-burn-rate.md
+  dashboardURL: https://grafana.example.com/d/checkout-api-availability

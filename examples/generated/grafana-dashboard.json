@@ -1,0 +1,167 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 3,
+          "max": 100,
+          "min": 0,
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "targets": [
+        {
+          "expr": "(1 - slo:bad_ratio:rate30d{service=\"checkout-api\",slo=\"availability\"}) * 100",
+          "refId": "A"
+        }
+      ],
+      "title": "30-day availability",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "max": 100,
+          "min": -100,
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "id": 2,
+      "targets": [
+        {
+          "expr": "slo:error_budget:remaining{service=\"checkout-api\",slo=\"availability\"} * 100",
+          "refId": "A"
+        }
+      ],
+      "title": "Error budget remaining",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 3,
+      "targets": [
+        {
+          "expr": "slo:burn_rate:rate1h{service=\"checkout-api\",slo=\"availability\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "Current burn rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 4,
+      "targets": [
+        {
+          "expr": "slo:burn_rate:rate5m{service=\"checkout-api\",slo=\"availability\"}",
+          "legendFormat": "5m",
+          "refId": "A"
+        },
+        {
+          "expr": "slo:burn_rate:rate1h{service=\"checkout-api\",slo=\"availability\"}",
+          "legendFormat": "1h",
+          "refId": "B"
+        },
+        {
+          "expr": "slo:burn_rate:rate6h{service=\"checkout-api\",slo=\"availability\"}",
+          "legendFormat": "6h",
+          "refId": "C"
+        },
+        {
+          "expr": "slo:burn_rate:rate3d{service=\"checkout-api\",slo=\"availability\"}",
+          "legendFormat": "3d",
+          "refId": "D"
+        }
+      ],
+      "title": "Multi-window burn rate",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": [
+    "slo",
+    "sre",
+    "slo-forge",
+    "checkout-api"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "Prometheus",
+          "value": "Prometheus"
+        },
+        "label": "Prometheus",
+        "name": "datasource",
+        "query": "prometheus",
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "checkout-api · availability SLO",
+  "uid": "checkout-api-availability",
+  "version": 1
+}

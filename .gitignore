@@ -1,0 +1,6 @@
+/bin/
+/coverage.out
+/dist/
+/generated/
+*.exe
+*.test

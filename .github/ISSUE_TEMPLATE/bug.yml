@@ -1,0 +1,47 @@
+name: Bug report
+description: Report reproducible incorrect behavior.
+title: "bug: "
+labels: [bug, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include secrets, internal URLs, or customer data.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output from `slo-forge version`.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide a minimal redacted SLO and the exact command.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options:
+        - CLI
+        - HTTP API
+        - Generated Prometheus rules
+        - Generated PrometheusRule
+        - Generated Grafana dashboard
+        - Container or CI
+    validations:
+      required: true

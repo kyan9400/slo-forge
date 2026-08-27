@@ -1,0 +1,156 @@
+groups:
+    - name: slo-forge.checkout-api.availability
+      interval: 30s
+      rules:
+        - record: slo:bad_ratio:rate5m
+          expr: (sum(rate(http_requests_total{service="checkout-api",code=~"5.."}[5m]))) / clamp_min((sum(rate(http_requests_total{service="checkout-api"}[5m]))), 1)
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:burn_rate:rate5m
+          expr: slo:bad_ratio:rate5m{service="checkout-api",slo="availability"} / 0.001
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:bad_ratio:rate30m
+          expr: (sum(rate(http_requests_total{service="checkout-api",code=~"5.."}[30m]))) / clamp_min((sum(rate(http_requests_total{service="checkout-api"}[30m]))), 1)
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:burn_rate:rate30m
+          expr: slo:bad_ratio:rate30m{service="checkout-api",slo="availability"} / 0.001
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:bad_ratio:rate1h
+          expr: (sum(rate(http_requests_total{service="checkout-api",code=~"5.."}[1h]))) / clamp_min((sum(rate(http_requests_total{service="checkout-api"}[1h]))), 1)
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:burn_rate:rate1h
+          expr: slo:bad_ratio:rate1h{service="checkout-api",slo="availability"} / 0.001
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:bad_ratio:rate2h
+          expr: (sum(rate(http_requests_total{service="checkout-api",code=~"5.."}[2h]))) / clamp_min((sum(rate(http_requests_total{service="checkout-api"}[2h]))), 1)
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:burn_rate:rate2h
+          expr: slo:bad_ratio:rate2h{service="checkout-api",slo="availability"} / 0.001
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:bad_ratio:rate6h
+          expr: (sum(rate(http_requests_total{service="checkout-api",code=~"5.."}[6h]))) / clamp_min((sum(rate(http_requests_total{service="checkout-api"}[6h]))), 1)
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:burn_rate:rate6h
+          expr: slo:bad_ratio:rate6h{service="checkout-api",slo="availability"} / 0.001
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:bad_ratio:rate1d
+          expr: (sum(rate(http_requests_total{service="checkout-api",code=~"5.."}[1d]))) / clamp_min((sum(rate(http_requests_total{service="checkout-api"}[1d]))), 1)
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:burn_rate:rate1d
+          expr: slo:bad_ratio:rate1d{service="checkout-api",slo="availability"} / 0.001
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:bad_ratio:rate3d
+          expr: (sum(rate(http_requests_total{service="checkout-api",code=~"5.."}[3d]))) / clamp_min((sum(rate(http_requests_total{service="checkout-api"}[3d]))), 1)
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:burn_rate:rate3d
+          expr: slo:bad_ratio:rate3d{service="checkout-api",slo="availability"} / 0.001
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:bad_ratio:rate30d
+          expr: (sum(rate(http_requests_total{service="checkout-api",code=~"5.."}[30d]))) / clamp_min((sum(rate(http_requests_total{service="checkout-api"}[30d]))), 1)
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - record: slo:error_budget:remaining
+          expr: 1 - (slo:bad_ratio:rate30d{service="checkout-api",slo="availability"} / 0.001)
+          labels:
+            service: checkout-api
+            slo: availability
+            team: checkout
+        - alert: SLOBudgetBurnPageFast
+          expr: (slo:burn_rate:rate1h{service="checkout-api",slo="availability"} > 14.4) and (slo:burn_rate:rate5m{service="checkout-api",slo="availability"} > 14.4)
+          for: 2m
+          labels:
+            service: checkout-api
+            severity: page
+            slo: availability
+            team: checkout
+            window_pair: 1h_5m
+          annotations:
+            dashboard_url: https://grafana.example.com/d/checkout-api-availability
+            description: The 1h and 5m windows are both above a 14.4x burn rate. Approximately 2% of the 30-day error budget can be consumed in 1 hour.
+            runbook_url: https://github.com/kyan9400/slo-forge/blob/main/docs/runbooks/high-burn-rate.md
+            summary: checkout-api is burning its availability SLO budget too quickly
+        - alert: SLOBudgetBurnPageSlow
+          expr: (slo:burn_rate:rate6h{service="checkout-api",slo="availability"} > 6) and (slo:burn_rate:rate30m{service="checkout-api",slo="availability"} > 6)
+          for: 15m
+          labels:
+            service: checkout-api
+            severity: page
+            slo: availability
+            team: checkout
+            window_pair: 6h_30m
+          annotations:
+            dashboard_url: https://grafana.example.com/d/checkout-api-availability
+            description: The 6h and 30m windows are both above a 6.0x burn rate. Approximately 5% of the 30-day error budget can be consumed in 6 hours.
+            runbook_url: https://github.com/kyan9400/slo-forge/blob/main/docs/runbooks/high-burn-rate.md
+            summary: checkout-api is burning its availability SLO budget too quickly
+        - alert: SLOBudgetBurnTicketFast
+          expr: (slo:burn_rate:rate1d{service="checkout-api",slo="availability"} > 3) and (slo:burn_rate:rate2h{service="checkout-api",slo="availability"} > 3)
+          for: 1h
+          labels:
+            service: checkout-api
+            severity: ticket
+            slo: availability
+            team: checkout
+            window_pair: 1d_2h
+          annotations:
+            dashboard_url: https://grafana.example.com/d/checkout-api-availability
+            description: The 1d and 2h windows are both above a 3.0x burn rate. Approximately 10% of the 30-day error budget can be consumed in 1 day.
+            runbook_url: https://github.com/kyan9400/slo-forge/blob/main/docs/runbooks/high-burn-rate.md
+            summary: checkout-api is burning its availability SLO budget too quickly
+        - alert: SLOBudgetBurnTicketSlow
+          expr: (slo:burn_rate:rate3d{service="checkout-api",slo="availability"} > 1) and (slo:burn_rate:rate6h{service="checkout-api",slo="availability"} > 1)
+          for: 3h
+          labels:
+            service: checkout-api
+            severity: ticket
+            slo: availability
+            team: checkout
+            window_pair: 3d_6h
+          annotations:
+            dashboard_url: https://grafana.example.com/d/checkout-api-availability
+            description: The 3d and 6h windows are both above a 1.0x burn rate. Approximately 10% of the 30-day error budget can be consumed in 3 days.
+            runbook_url: https://github.com/kyan9400/slo-forge/blob/main/docs/runbooks/high-burn-rate.md
+            summary: checkout-api is burning its availability SLO budget too quickly
