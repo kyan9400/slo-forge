@@ -4,3 +4,9 @@
 /generated/
 *.exe
 *.test
+
+# OS and local environment files
+.DS_Store
+.env
+.env.*
+!.env.example
