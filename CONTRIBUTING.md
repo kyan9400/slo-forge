@@ -4,7 +4,7 @@ Thank you for improving SLO Forge.
 
 ## Development
 
-Prerequisites: Go 1.21 or later and Docker for the full validation path.
+Prerequisites: Go 1.27 or later and Docker for the full validation path.
 
 ```bash
 go mod download
