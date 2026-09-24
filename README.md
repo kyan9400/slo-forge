@@ -3,6 +3,7 @@
 [![CI](https://github.com/kyan9400/slo-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/kyan9400/slo-forge/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/kyan9400/slo-forge)](https://github.com/kyan9400/slo-forge/releases)
 [![License](https://img.shields.io/github/license/kyan9400/slo-forge)](LICENSE)
+[![Go Reference](https://pkg.go.dev/badge/github.com/kyan9400/slo-forge.svg)](https://pkg.go.dev/github.com/kyan9400/slo-forge)
 
 SLO Forge turns one reviewable service-level objective into production-ready Prometheus recording rules, multi-window burn-rate alerts, a Prometheus Operator resource, a Grafana dashboard, and a plain-language policy summary.
 
@@ -27,6 +28,29 @@ flowchart LR
 - Supports a local CLI and a small HTTP API with health, readiness, and Prometheus metrics.
 - Ships as a static, non-root container with no shell or package manager.
 - Tests generated rules with the official `promtool` in CI.
+
+## Install
+
+Every [GitHub release](https://github.com/kyan9400/slo-forge/releases/latest) ships prebuilt binaries for Linux (`amd64`, `arm64`), macOS (`amd64`, `arm64`), and Windows (`amd64`), plus a `checksums.txt` manifest. The manifest lists assets under a `dist/` directory, so keep that name when verifying. On Linux x86-64:
+
+```bash
+base=https://github.com/kyan9400/slo-forge/releases/latest/download
+curl -fsSL --create-dirs -o dist/slo-forge_linux_amd64 "$base/slo-forge_linux_amd64"
+curl -fsSL -o dist/checksums.txt "$base/checksums.txt"
+sha256sum --check --ignore-missing dist/checksums.txt
+sudo install -m 0755 dist/slo-forge_linux_amd64 /usr/local/bin/slo-forge
+slo-forge version
+```
+
+Substitute `slo-forge_linux_arm64`, `slo-forge_darwin_amd64`, `slo-forge_darwin_arm64`, or `slo-forge_windows_amd64.exe` for other platforms.
+
+With a Go toolchain installed, build the latest tagged version from the module proxy instead:
+
+```bash
+go install github.com/kyan9400/slo-forge/cmd/slo-forge@latest
+```
+
+The container image is built from the [Dockerfile](Dockerfile) in this repository; `docker compose up --build` in the quick start below produces a local `slo-forge:local` image.
 
 ## Quick start
 
